@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
+"""connman contains simple functions that perform login and logout related tasks.
+
+It is only useful in the network of the Johannes Gutenberg University Mainz where this special type of login measures is performed."""
+
 import sys
 import re
 from urlparse import urlsplit, urlunsplit
