@@ -12,6 +12,9 @@ host = 'login.wohnheim.uni-mainz.de'
 path = {'loginref': '/login.html', 'login': '/cgi-bin/login-cgi', 'logoutref': '/logout.html', 'logout': '/cgi-bin/logout.cgi'}
 
 def login(username, password):
+	"""Call the login site for the current host with supplied username and password.
+	
+	Returns tuple of consumed download/upload traffic in percent."""
 	params  = urlencode({'user': username, 'pass': password, 'submit': '   Login   ', 'forward': '', 's': ''})
 	headers = {"Content-type": "application/x-www-form-urlencoded", "Referer": urlunsplit((scheme, host, path['loginref'], "", ""))}
 	conn = HTTPSConnection(host)
@@ -35,6 +38,7 @@ def login(username, password):
 	return match.groups()
 
 def logout():
+	"""Call the logout site for the current host"""
 	params  = urlencode({'submit': '   Logout   ', 'command': 'logout'})
 	headers = {"Content-type": "application/x-www-form-urlencoded", "Referer": urlunsplit((scheme, host, path['logoutref'], "", ""))}
 	conn = HTTPSConnection(host)
@@ -54,6 +58,7 @@ def logout():
 	return
 
 def isLoggedIn():
+	"""Check if the current host is logged in"""
 	conn = HTTPSConnection(host)
 	conn.request("GET", "/")
 	response = conn.getresponse()
