@@ -1,36 +1,47 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
 """connman contains simple functions that perform login and logout related tasks.
 
-It is only useful in the network of the Johannes Gutenberg University Mainz where this special type of login measures is performed."""
+It is only useful in the network of the Johannes Gutenberg University Mainz where this
+special type of login measures is performed."""
 
 import sys
 import re
-from urlparse import urlsplit, urlunsplit
-from httplib import HTTPSConnection
-from urllib import urlencode
+
+if sys.version_info[0] == 2:
+	from urlparse import urlsplit, urlunsplit
+	from httplib import HTTPSConnection
+	from urllib import urlencode
+elif sys.version_info[0] == 3:
+	from urllib.parse import urlsplit, urlunsplit, urlencode
+	from http.client import HTTPSConnection
+else:
+	raise ImportError('Don\'t know which libraries to import')
 
 scheme = "https"
 host = 'login.wohnheim.uni-mainz.de'
-path = {'loginref': '/login.html', 'login': '/cgi-bin/login-cgi', 'logoutref': '/logout.html', 'logout': '/cgi-bin/logout.cgi'}
+path = {'loginref': '/login.html', 'login': '/cgi-bin/login-cgi',
+		'logoutref': '/logout.html', 'logout': '/cgi-bin/logout.cgi'}
 
 def login(username, password):
 	"""Call the login site for the current host with supplied username and password.
 	
 	Returns tuple of consumed download/upload traffic in percent."""
-	params  = urlencode({'user': username, 'pass': password, 'submit': '   Login   ', 'forward': '', 's': ''})
-	headers = {"Content-type": "application/x-www-form-urlencoded", "Referer": urlunsplit((scheme, host, path['loginref'], "", ""))}
+	params  = urlencode({'user': username, 'pass': password, 'submit': '   Login   ',
+						'forward': '', 's': ''})
+	headers = {"Content-type": "application/x-www-form-urlencoded",
+				"Referer": urlunsplit((scheme, host, path['loginref'], "", ""))}
 	conn = HTTPSConnection(host)
 	conn.request("POST", path['login'], params, headers)
 	response = conn.getresponse()
 	if 300 <= response.status < 400:
+		# Handle possible redirection
 		conn.close()
 		b = urlsplit(response.getheader('location'))
 		#print b.path
 		conn.request("GET", b.path)
 		response = conn.getresponse()
-	#print dir(response)
 	#print response.status, response.reason
 	#print response.msg
 	#print response.getheaders()
@@ -49,17 +60,18 @@ def login(username, password):
 def logout():
 	"""Call the logout site for the current host"""
 	params  = urlencode({'submit': '   Logout   ', 'command': 'logout'})
-	headers = {"Content-type": "application/x-www-form-urlencoded", "Referer": urlunsplit((scheme, host, path['logoutref'], "", ""))}
+	headers = {"Content-type": "application/x-www-form-urlencoded",
+				"Referer": urlunsplit((scheme, host, path['logoutref'], "", ""))}
 	conn = HTTPSConnection(host)
 	conn.request("POST", path['logout'], params, headers)
 	response = conn.getresponse()
 	if 300 <= response.status < 400:
+		# Handle possible redirection
 		conn.close()
 		b = urlsplit(response.getheader('location'))
 		#print b.path
 		conn.request("GET", b.path)
 		response = conn.getresponse()
-	#print dir(response)
 	#print response.status, response.reason
 	#print response.msg
 	#print response.getheaders()
@@ -80,19 +92,19 @@ if __name__ == '__main__':
 	if len(sys.argv) >= 2:
 		user = sys.argv[1]
 	else:
-		user = raw_input("ZDV-Benutzername: ")
+		user = input("ZDV-Benutzername: ")
 	if len(sys.argv) == 3:
 		password = sys.argv[2]
-		print """
+		print("""
 WARNUNG: 
 Passwörter sollten niemals auf der Kommandozeile eingegeben werden.
 Sie sind für jeden lesbar, der Zugriff auf die History-Datei der Shell hat.
-		"""
+		""")
 	else:	
 		import getpass
 		password = getpass.getpass("ZDV-Passwort: ")
-	print "Logged in: %s" % isLoggedIn()
+	print("Logged in: %s" % isLoggedIn())
 	logout()
-	print "Logged in: %s" % isLoggedIn()
-	print login(user, password)
-	print "Logged in: %s" % isLoggedIn()
+	print("Logged in: %s" % isLoggedIn())
+	print(login(user, password))
+	print("Logged in: %s" % isLoggedIn())
