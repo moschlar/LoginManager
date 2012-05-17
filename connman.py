@@ -13,11 +13,12 @@ if sys.version_info[0] == 2:
 	from urlparse import urlsplit, urlunsplit
 	from httplib import HTTPSConnection
 	from urllib import urlencode
+	input = raw_input
 elif sys.version_info[0] == 3:
 	from urllib.parse import urlsplit, urlunsplit, urlencode
 	from http.client import HTTPSConnection
 else:
-	raise ImportError('Don\'t know which libraries to import')
+	raise Exception('Can not determine sys.version')
 
 scheme = "https"
 host = 'login.wohnheim.uni-mainz.de'
@@ -46,6 +47,7 @@ def login(username, password):
 	#print response.msg
 	#print response.getheaders()
 	site = response.read()
+	site = str(site)
 	#print site
 	site = site.split('table')[1]
 	#pattern = re.compile(r'You have consumed (\d*)/(\d*) % of your monthly')
