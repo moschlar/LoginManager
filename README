@@ -1,3 +1,5 @@
-connman is a python module that handles login and logout request in the university network of the Johannes Gutenberg University Mainz.
+connman is a python module that handles login and logout request in the university network
+of the Johannes Gutenberg University Mainz.
 
-conncheck is a python module that performs periodic checks if a given host is reachable and if not may perform an action (e.g. calling the login method of connman)
+conncheck is a python module that performs periodic checks if a given host is reachable
+and if not may perform an action (e.g. calling the login method of connman)
