@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 #-*- coding: utf-8 -*-
 
 """connman contains simple functions that perform login and logout related tasks.
@@ -36,10 +36,15 @@ def login(username, password):
 	#print response.getheaders()
 	site = response.read()
 	#print site
+	site = site.split('table')[1]
 	#pattern = re.compile(r'You have consumed (\d*)/(\d*) % of your monthly')
-	pattern = re.compile(r'consumed (.*?)/(.*?) % of your', re.MULTILINE)
-	match = pattern.search(site)
-	return match.groups()
+	pattern_traffic = re.compile(r'consumed (.*?)/(.*?) % of your', re.MULTILINE)
+	#str_consumed = u'consumed your montly traffic allowance'
+	match = pattern_traffic.search(site)
+	if match:
+		return match.groups()
+	else:
+		return (100,100)
 
 def logout():
 	"""Call the logout site for the current host"""
