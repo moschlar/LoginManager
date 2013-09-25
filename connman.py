@@ -40,24 +40,11 @@ def login(username, password):
 		# Handle possible redirection
 		conn.close()
 		b = urlsplit(response.getheader('location'))
-		#print b.path
 		conn.request("GET", b.path)
 		response = conn.getresponse()
-	#print response.status, response.reason
-	#print response.msg
-	#print response.getheaders()
 	site = response.read()
 	site = str(site)
-	#print site
-	site = site.split('table')[1]
-	#pattern = re.compile(r'You have consumed (\d*)/(\d*) % of your monthly')
-	pattern_traffic = re.compile(r'consumed (.*?)/(.*?) % of your', re.MULTILINE)
-	#str_consumed = u'consumed your montly traffic allowance'
-	match = pattern_traffic.search(site)
-	if match:
-		return match.groups()
-	else:
-		return (100,100)
+	return 'LogIn successful.' in site
 
 def logout():
 	"""Call the logout site for the current host"""
@@ -71,14 +58,11 @@ def logout():
 		# Handle possible redirection
 		conn.close()
 		b = urlsplit(response.getheader('location'))
-		#print b.path
 		conn.request("GET", b.path)
 		response = conn.getresponse()
-	#print response.status, response.reason
-	#print response.msg
-	#print response.getheaders()
-	#print response.read()
-	return
+	site = response.read()
+	site = str(site)
+	return 'Your IP has been successfully disabled.' in site
 
 def isLoggedIn():
 	"""Check if the current host is logged in"""
@@ -91,22 +75,33 @@ def isLoggedIn():
 		return False
 
 if __name__ == '__main__':
-	if len(sys.argv) >= 2:
-		user = sys.argv[1]
-	else:
-		user = input("ZDV-Benutzername: ")
-	if len(sys.argv) == 3:
-		password = sys.argv[2]
-		print("""
-WARNUNG: 
+	if len(sys.argv) < 2 or sys.argv[1] not in ('status', 'login', 'logout'):
+		print("Usage: %s <status|login|logout>")
+		sys.exit(1)
+
+	if sys.argv[1] == 'status':
+		status = isLoggedIn()
+	elif sys.argv[1] == 'logout':
+		status = logout()
+	elif sys.argv[1] == 'login':
+		if len(sys.argv) >= 3:
+			user = sys.argv[2]
+		else:
+			user = input("ZDV-Benutzername: ")
+		if len(sys.argv) == 4:
+			password = sys.argv[3]
+			print("""
+WARNUNG:
 Passwörter sollten niemals auf der Kommandozeile eingegeben werden.
 Sie sind für jeden lesbar, der Zugriff auf die History-Datei der Shell hat.
-		""")
-	else:	
-		import getpass
-		password = getpass.getpass("ZDV-Passwort: ")
-	print("Logged in: %s" % isLoggedIn())
-	logout()
-	print("Logged in: %s" % isLoggedIn())
-	print(login(user, password))
-	print("Logged in: %s" % isLoggedIn())
+""")
+		else:	
+			import getpass
+			password = getpass.getpass("ZDV-Passwort: ")
+		status = login(user, password)
+
+	print(status)
+
+	status = 0 if status else 1
+
+	sys.exit(status)
